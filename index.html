@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="sk">
 <head>
@@ -7,133 +6,140 @@
 <title>Trade Tracker</title>
 
 <style>
-body {
-    font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-    background: #101217;
-    color: white;
-    margin: 0;
-    padding: 16px;
+body{
+    font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;
+    background:#101217;
+    color:white;
+    margin:0;
+    padding:16px;
 }
 
-.container {
-    max-width: 900px;
-    margin: auto;
+.container{
+    max-width:900px;
+    margin:auto;
 }
 
-.card {
-    background: #191d25;
-    border-radius: 16px;
-    padding: 16px;
-    margin-bottom: 15px;
+.card{
+    background:#191d25;
+    border-radius:16px;
+    padding:16px;
+    margin-bottom:15px;
 }
 
-h1 { margin-bottom: 5px; }
+h1{margin-bottom:5px}
 
-.subtitle {
-    color: #aaa;
-    margin-top: 0;
+.subtitle{
+    color:#aaa;
+    margin-top:0;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
 }
 
-label {
-    font-size: 12px;
-    color: #aaa;
-    display: block;
-    margin-bottom: 5px;
+label{
+    font-size:12px;
+    color:#aaa;
+    display:block;
+    margin-bottom:5px;
 }
 
-input, select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #343b48;
-    background: #101319;
-    color: white;
-    font-size: 16px;
+input,select{
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    border-radius:10px;
+    border:1px solid #343b48;
+    background:#101319;
+    color:white;
+    font-size:16px;
 }
 
-button {
-    width: 100%;
-    padding: 14px;
-    border: 0;
-    border-radius: 10px;
-    background: #4778ff;
-    color: white;
-    font-size: 16px;
-    font-weight: bold;
+button{
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:10px;
+    background:#4778ff;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
 }
 
-.stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
 }
 
-.stat {
-    background: #101319;
-    padding: 12px 5px;
-    border-radius: 10px;
-    text-align: center;
+.stat{
+    background:#101319;
+    padding:12px 5px;
+    border-radius:10px;
+    text-align:center;
 }
 
-.stat b {
-    font-size: 20px;
+.stat b{
+    font-size:20px;
 }
 
-.win { color: #45d483; }
-.lose { color: #ff6572; }
+.win{color:#45d483}
+.lose{color:#ff6572}
 
-.success {
-    display: none;
-    color: #45d483;
-    text-align: center;
-    margin-top: 12px;
-    font-weight: bold;
+.success{
+    display:none;
+    color:#45d483;
+    text-align:center;
+    margin-top:12px;
+    font-weight:bold;
 }
 
-.tablebox {
-    overflow-x: auto;
+.tablebox{
+    overflow-x:auto;
 }
 
-table {
-    width: 100%;
-    min-width: 700px;
-    border-collapse: collapse;
+table{
+    width:100%;
+    min-width:700px;
+    border-collapse:collapse;
 }
 
-th, td {
-    text-align: left;
-    padding: 9px;
-    border-bottom: 1px solid #303641;
-    font-size: 13px;
+th,td{
+    text-align:left;
+    padding:9px;
+    border-bottom:1px solid #303641;
+    font-size:13px;
 }
 
-.delete {
-    width: auto;
-    padding: 6px 10px;
-    background: #7a2831;
+.edit{
+    width:auto;
+    padding:7px 10px;
+    background:#e6a93c;
+    color:#111;
 }
 
-.actions {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
+.cancel{
+    background:#4a5260;
+    margin-top:8px;
+    display:none;
 }
 
-.actions button {
-    font-size: 13px;
-    padding: 10px;
+.actions{
+    display:flex;
+    gap:8px;
+    margin-bottom:15px;
 }
 
-@media(max-width:600px) {
-    .stats {
-        grid-template-columns: 1fr 1fr;
+.actions button{
+    font-size:13px;
+    padding:10px;
+}
+
+@media(max-width:600px){
+    .stats{
+        grid-template-columns:1fr 1fr;
     }
 }
 </style>
@@ -206,13 +212,22 @@ th, td {
 
 <br>
 
-<button onclick="saveTrade()">ULOŽIŤ OBCHOD</button>
+<button id="saveButton" onclick="saveTrade()">
+ULOŽIŤ OBCHOD
+</button>
+
+<button id="cancelButton"
+class="cancel"
+onclick="cancelEdit()">
+ZRUŠIŤ ÚPRAVU
+</button>
 
 <div class="success" id="success">
 ✓ Obchod bol uložený
 </div>
 
 </div>
+
 
 <div class="card">
 
@@ -242,11 +257,19 @@ Win rate<br>
 
 </div>
 
+
 <div class="card">
 
 <div class="actions">
-<button onclick="exportCSV()">Export CSV</button>
-<button onclick="backup()">Záloha</button>
+
+<button onclick="exportCSV()">
+Export CSV
+</button>
+
+<button onclick="backup()">
+Záloha
+</button>
+
 </div>
 
 <div class="tablebox">
@@ -254,6 +277,7 @@ Win rate<br>
 <table>
 
 <thead>
+
 <tr>
 <th>Dátum</th>
 <th>#</th>
@@ -265,6 +289,7 @@ Win rate<br>
 <th>Poznámka</th>
 <th></th>
 </tr>
+
 </thead>
 
 <tbody id="table"></tbody>
@@ -272,258 +297,519 @@ Win rate<br>
 </table>
 
 </div>
+
 </div>
 
 </div>
+
 
 <script>
 
-const STORAGE = "tradeTrackerDataV1";
+const STORAGE="tradeTrackerDataV1";
 
-let trades = [];
+let trades=[];
+let editingId=null;
 
-try {
-    trades = JSON.parse(localStorage.getItem(STORAGE)) || [];
-} catch(e) {
-    trades = [];
+try{
+    trades=
+    JSON.parse(
+        localStorage.getItem(STORAGE)
+    ) || [];
+}
+catch(e){
+    trades=[];
 }
 
-const el = id => document.getElementById(id);
+const el=id=>
+document.getElementById(id);
 
-function todayDate() {
-    const d = new Date();
-    const offset = d.getTimezoneOffset();
-    return new Date(d.getTime() - offset * 60000)
-        .toISOString()
-        .slice(0,10);
+
+function todayDate(){
+
+    const d=new Date();
+
+    const offset=
+    d.getTimezoneOffset();
+
+    return new Date(
+        d.getTime()-offset*60000
+    )
+    .toISOString()
+    .slice(0,10);
 }
 
-el("date").value = todayDate();
+el("date").value=todayDate();
 
-function insuranceName(n) {
-    const names = {
+
+function insuranceName(n){
+
+    return ({
         1:"1. obchod",
         2:"1. poistka",
         3:"2. poistka",
         4:"3. poistka",
         5:"4. poistka"
-    };
-
-    return names[n];
+    })[n];
 }
 
-function nextNumber() {
 
-    const date = el("date").value;
+function nextNumber(){
 
-    const numbers = trades
-        .filter(t => t.date === date)
-        .map(t => Number(t.number));
+    if(editingId!==null)
+        return;
 
-    el("number").value =
-        numbers.length ? Math.max(...numbers) + 1 : 1;
+    const date=
+    el("date").value;
+
+    const numbers=
+    trades
+    .filter(t=>t.date===date)
+    .map(t=>Number(t.number));
+
+    el("number").value=
+    numbers.length
+    ? Math.max(...numbers)+1
+    : 1;
 }
 
-function saveData() {
+
+function saveData(){
+
     localStorage.setItem(
         STORAGE,
         JSON.stringify(trades)
     );
 }
 
-function saveTrade() {
 
-    const trade = {
+function formData(){
 
-        id: Date.now(),
+    return{
 
-        date: el("date").value,
+        date:
+        el("date").value,
 
-        number: Number(el("number").value),
+        number:
+        Number(el("number").value),
 
-        direction: el("direction").value,
+        direction:
+        el("direction").value,
 
-        result: el("result").value,
+        result:
+        el("result").value,
 
-        insurance: Number(el("insurance").value),
+        insurance:
+        Number(el("insurance").value),
 
-        pair: el("pair").value,
+        pair:
+        el("pair").value,
 
-        amount: el("amount").value,
+        amount:
+        el("amount").value,
 
-        note: el("note").value,
+        note:
+        el("note").value,
 
-        payout: 92
+        payout:92
     };
+}
 
-    trades.push(trade);
+
+function resetForm(){
+
+    editingId=null;
+
+    el("pair").value="";
+    el("amount").value="";
+    el("note").value="";
+
+    el("direction").value="CALL";
+    el("result").value="WIN";
+    el("insurance").value="1";
+
+    el("saveButton").textContent=
+    "ULOŽIŤ OBCHOD";
+
+    el("cancelButton").style.display=
+    "none";
+
+    nextNumber();
+}
+
+
+function saveTrade(){
+
+    const data=formData();
+
+    if(editingId===null){
+
+        trades.push({
+            id:Date.now(),
+            ...data
+        });
+
+        el("success").textContent=
+        "✓ Obchod bol uložený";
+    }
+
+    else{
+
+        const i=
+        trades.findIndex(
+            t=>t.id===editingId
+        );
+
+        if(i!==-1){
+
+            trades[i]={
+                ...trades[i],
+                ...data
+            };
+        }
+
+        el("success").textContent=
+        "✓ Zmeny boli uložené";
+    }
 
     saveData();
 
-    el("pair").value = "";
-    el("amount").value = "";
-    el("note").value = "";
+    resetForm();
 
     render();
 
-    el("success").style.display = "block";
+    el("success").style.display=
+    "block";
 
-    setTimeout(() => {
-        el("success").style.display = "none";
+    setTimeout(()=>{
+
+        el("success").style.display=
+        "none";
+
     },1500);
 }
 
-function deleteTrade(id) {
 
-    if(!confirm("Vymazať tento obchod?"))
-        return;
+function editTrade(id){
 
-    trades = trades.filter(
-        t => t.id !== id
+    const t=
+    trades.find(
+        t=>t.id===id
     );
 
-    saveData();
+    if(!t)
+        return;
+
+    editingId=id;
+
+    el("date").value=
+    t.date;
+
+    el("number").value=
+    t.number;
+
+    el("direction").value=
+    t.direction;
+
+    el("result").value=
+    t.result;
+
+    el("insurance").value=
+    t.insurance;
+
+    el("pair").value=
+    t.pair || "";
+
+    el("amount").value=
+    t.amount || "";
+
+    el("note").value=
+    t.note || "";
+
+    el("saveButton").textContent=
+    "ULOŽIŤ ZMENY";
+
+    el("cancelButton").style.display=
+    "block";
+
+    window.scrollTo({
+        top:0,
+        behavior:"smooth"
+    });
+}
+
+
+function cancelEdit(){
+
+    resetForm();
 
     render();
 }
 
-function render() {
 
-    const tbody = el("table");
+function esc(v){
 
-    tbody.innerHTML = "";
+    return String(v ?? "")
+
+    .replace(/&/g,"&amp;")
+
+    .replace(/</g,"&lt;")
+
+    .replace(/>/g,"&gt;")
+
+    .replace(/"/g,"&quot;")
+
+    .replace(/'/g,"&#039;");
+}
+
+
+function render(){
+
+    const tbody=
+    el("table");
+
+    tbody.innerHTML="";
 
     [...trades]
     .reverse()
-    .forEach(t => {
+    .forEach(t=>{
 
-        const row =
+        const row=
         document.createElement("tr");
 
-        row.innerHTML = `
-        <td>${t.date}</td>
-        <td>${t.number}</td>
-        <td>${t.direction}</td>
-
-        <td class="${t.result === "WIN" ? "win" : "lose"}">
-        ${t.result}
-        </td>
-
-        <td>${insuranceName(t.insurance)}</td>
-
-        <td>${t.pair}</td>
+        row.innerHTML=`
 
         <td>
-        ${t.amount ? Number(t.amount).toFixed(2)+" €" : ""}
+        ${esc(t.date)}
         </td>
 
-        <td>${t.note}</td>
+        <td>
+        ${esc(t.number)}
+        </td>
 
         <td>
+        ${esc(t.direction)}
+        </td>
+
+        <td class="${
+            t.result==="WIN"
+            ? "win"
+            : "lose"
+        }">
+
+        ${esc(t.result)}
+
+        </td>
+
+        <td>
+        ${esc(
+            insuranceName(
+                t.insurance
+            )
+        )}
+        </td>
+
+        <td>
+        ${esc(t.pair)}
+        </td>
+
+        <td>
+        ${
+            t.amount
+            ? Number(t.amount)
+              .toFixed(2)+" €"
+            : ""
+        }
+        </td>
+
+        <td>
+        ${esc(t.note)}
+        </td>
+
+        <td>
+
         <button
-        class="delete"
-        onclick="deleteTrade(${t.id})">
-        ×
+        class="edit"
+        onclick="editTrade(${t.id})">
+
+        ✏️ Upraviť
+
         </button>
+
         </td>
         `;
 
         tbody.appendChild(row);
     });
 
-    const wins =
-        trades.filter(t => t.result === "WIN").length;
 
-    const losses =
-        trades.filter(t => t.result === "LOSE").length;
+    const wins=
+    trades.filter(
+        t=>t.result==="WIN"
+    ).length;
 
-    const total =
-        wins + losses;
 
-    el("wins").textContent = wins;
+    const losses=
+    trades.filter(
+        t=>t.result==="LOSE"
+    ).length;
 
-    el("losses").textContent = losses;
 
-    el("winrate").textContent =
-        total
-        ? (wins / total * 100).toFixed(1) + " %"
-        : "0 %";
+    const total=
+    wins+losses;
 
-    const selectedDate =
-        el("date").value;
 
-    el("today").textContent =
-        trades.filter(
-            t => t.date === selectedDate
-        ).length;
+    el("wins").textContent=
+    wins;
+
+
+    el("losses").textContent=
+    losses;
+
+
+    el("winrate").textContent=
+
+    total
+
+    ? (wins/total*100)
+      .toFixed(1)+" %"
+
+    : "0 %";
+
+
+    const selectedDate=
+    el("date").value;
+
+
+    el("today").textContent=
+
+    trades.filter(
+        t=>t.date===selectedDate
+    ).length;
+
 
     nextNumber();
 }
 
-function exportCSV() {
 
-    const header =
+function exportCSV(){
+
+    const header=
+
     "Datum,Cislo,Smer,Vysledok,Poistka,Trh,Stavka,Payout,Poznamka\n";
 
-    const rows =
-    trades.map(t => {
 
-        return [
-            t.date,
-            t.number,
-            t.direction,
-            t.result,
-            insuranceName(t.insurance),
-            t.pair,
-            t.amount,
-            "92%",
-            t.note
-        ].map(v =>
-            `"${String(v || "").replace(/"/g,'""')}"`
-        ).join(",");
+    const rows=
 
-    }).join("\n");
+    trades.map(t=>
+
+    [
+
+        t.date,
+
+        t.number,
+
+        t.direction,
+
+        t.result,
+
+        insuranceName(
+            t.insurance
+        ),
+
+        t.pair,
+
+        t.amount,
+
+        "92%",
+
+        t.note
+
+    ]
+
+    .map(v=>
+
+    `"${String(v || "")
+    .replace(/"/g,'""')}"`
+
+    )
+
+    .join(",")
+
+    )
+
+    .join("\n");
+
 
     download(
+
         "trades.csv",
-        header + rows,
+
+        header+rows,
+
         "text/csv"
     );
 }
 
-function backup() {
+
+function backup(){
 
     download(
+
         "trade-backup.json",
-        JSON.stringify(trades,null,2),
+
+        JSON.stringify(
+            trades,
+            null,
+            2
+        ),
+
         "application/json"
     );
 }
 
-function download(name,data,type) {
 
-    const blob =
-        new Blob([data],{type:type});
+function download(
+    name,
+    data,
+    type
+){
 
-    const url =
-        URL.createObjectURL(blob);
+    const blob=
+    new Blob(
+        [data],
+        {type}
+    );
 
-    const a =
-        document.createElement("a");
+    const url=
+    URL.createObjectURL(
+        blob
+    );
 
-    a.href = url;
+    const a=
+    document.createElement("a");
 
-    a.download = name;
+    a.href=url;
+
+    a.download=name;
 
     a.click();
 
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(
+        url
+    );
 }
 
-el("date").addEventListener(
+
+el("date")
+.addEventListener(
     "change",
-    render
+    ()=>{
+
+        if(editingId===null)
+            render();
+    }
 );
+
 
 render();
 
