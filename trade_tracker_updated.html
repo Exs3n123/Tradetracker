@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Tracker</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;background:#101217;color:#fff;margin:0;padding:16px}
+.container{max-width:900px;margin:auto}.card{background:#191d25;border-radius:16px;padding:16px;margin-bottom:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{font-size:12px;color:#aaa;display:block;margin-bottom:5px}
+input,select{width:100%;box-sizing:border-box;padding:12px;border-radius:10px;border:1px solid #343b48;background:#101319;color:#fff;font-size:16px}
+button{width:100%;padding:14px;border:0;border-radius:10px;background:#4778ff;color:#fff;font-size:16px;font-weight:bold}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:#101319;padding:12px 5px;border-radius:10px;text-align:center}
+.win{color:#45d483}.lose{color:#ff6572}.success{display:none;color:#45d483;text-align:center;margin-top:12px;font-weight:bold}
+.tablebox{overflow-x:auto}table{width:100%;min-width:760px;border-collapse:collapse}th,td{text-align:left;padding:9px;border-bottom:1px solid #303641;font-size:13px}
+.tradeActions{display:flex;gap:6px}.edit{width:auto;padding:7px 10px;background:#e6a93c;color:#111}.delete{width:auto;padding:7px 10px;background:#7a2831}
+.cancel{background:#4a5260;margin-top:8px;display:none}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}.actions button{flex:1;min-width:140px;font-size:13px;padding:10px}
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}}
+</style></head>
+<body><div class="container">
+<h1>📊 Trade Tracker</h1><p style="color:#aaa">Denník obchodov • payout 92 %</p>
+<div class="card"><div class="grid">
+<div><label>Dátum</label><input type="date" id="date"></div>
+<div><label>Obchod v daný deň</label><input type="number" id="number" min="1"></div>
+<div><label>Smer</label><select id="direction"><option>CALL</option><option>PUT</option></select></div>
+<div><label>Výsledok</label><select id="result"><option>WIN</option><option>LOSE</option></select></div>
+<div><label>Poistka</label><select id="insurance"><option value="1">1. obchod</option><option value="2">1. poistka</option><option value="3">2. poistka</option><option value="4">3. poistka</option><option value="5">4. poistka</option></select></div>
+<div><label>Menový pár / trh</label><input id="pair" placeholder="USD/JPY OTC"></div>
+<div><label>Výška stávky €</label><input type="number" id="amount" step="0.01" min="0" placeholder="50"></div>
+<div><label>Poznámka</label><input id="note" placeholder="napr. A setup"></div>
+</div><br>
+<button id="saveButton" onclick="saveTrade()">ULOŽIŤ OBCHOD</button>
+<button id="cancelButton" class="cancel" onclick="cancelEdit()">ZRUŠIŤ ÚPRAVU</button>
+<div class="success" id="success"></div></div>
+
+<div class="card"><div class="stats">
+<div class="stat">Dnes<br><b id="today">0</b></div>
+<div class="stat">WIN<br><b class="win" id="wins">0</b></div>
+<div class="stat">LOSE<br><b class="lose" id="losses">0</b></div>
+<div class="stat">Win rate<br><b id="winrate">0 %</b></div>
+</div></div>
+
+<div class="card"><div class="actions">
+<button onclick="exportCSV()">Export CSV</button>
+<button onclick="backup()">Záloha</button>
+<button onclick="document.getElementById('restoreFile').click()">Obnoviť zo zálohy</button>
+<input type="file" id="restoreFile" accept=".json,application/json" style="display:none">
+</div>
+<div class="tablebox"><table><thead><tr><th>Dátum</th><th>#</th><th>Smer</th><th>Výsledok</th><th>Poistka</th><th>Trh</th><th>Stávka</th><th>Poznámka</th><th>Akcie</th></tr></thead><tbody id="table"></tbody></table></div></div>
+</div>
+<script>
+const STORAGE="tradeTrackerDataV1";let trades=[],editingId=null;
+try{trades=JSON.parse(localStorage.getItem(STORAGE))||[]}catch(e){}
+const el=id=>document.getElementById(id);
+function todayDate(){const d=new Date(),o=d.getTimezoneOffset();return new Date(d.getTime()-o*60000).toISOString().slice(0,10)}
+el("date").value=todayDate();
+function insuranceName(n){return({1:"1. obchod",2:"1. poistka",3:"2. poistka",4:"3. poistka",5:"4. poistka"})[n]}
+function nextNumber(){if(editingId!==null)return;const d=el("date").value,a=trades.filter(t=>t.date===d).map(t=>+t.number);el("number").value=a.length?Math.max(...a)+1:1}
+function saveData(){localStorage.setItem(STORAGE,JSON.stringify(trades))}
+function msg(s){el("success").textContent=s;el("success").style.display="block";setTimeout(()=>el("success").style.display="none",1700)}
+function resetForm(){editingId=null;el("pair").value="";el("amount").value="";el("note").value="";el("direction").value="CALL";el("result").value="WIN";el("insurance").value="1";el("saveButton").textContent="ULOŽIŤ OBCHOD";el("cancelButton").style.display="none";nextNumber()}
+function saveTrade(){const d={date:el("date").value,number:+el("number").value,direction:el("direction").value,result:el("result").value,insurance:+el("insurance").value,pair:el("pair").value,amount:el("amount").value,note:el("note").value,payout:92};if(editingId===null){trades.push({id:Date.now(),...d});msg("✓ Obchod bol uložený")}else{const i=trades.findIndex(t=>t.id===editingId);if(i>=0)trades[i]={...trades[i],...d};msg("✓ Zmeny boli uložené")}saveData();resetForm();render()}
+function editTrade(id){const t=trades.find(t=>t.id===id);if(!t)return;editingId=id;["date","number","direction","result","insurance","pair","amount","note"].forEach(k=>el(k).value=t[k]??"");el("saveButton").textContent="ULOŽIŤ ZMENY";el("cancelButton").style.display="block";scrollTo({top:0,behavior:"smooth"})}
+function deleteTrade(id){if(!confirm("Naozaj chceš vymazať tento obchod?"))return;trades=trades.filter(t=>t.id!==id);saveData();if(editingId===id)resetForm();render();msg("✓ Obchod bol vymazaný")}
+function cancelEdit(){resetForm();render()}
+function esc(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+function render(){const b=el("table");b.innerHTML="";[...trades].reverse().forEach(t=>{const r=document.createElement("tr");r.innerHTML=`<td>${esc(t.date)}</td><td>${esc(t.number)}</td><td>${esc(t.direction)}</td><td class="${t.result==="WIN"?"win":"lose"}">${esc(t.result)}</td><td>${esc(insuranceName(t.insurance))}</td><td>${esc(t.pair)}</td><td>${t.amount?Number(t.amount).toFixed(2)+" €":""}</td><td>${esc(t.note)}</td><td><div class="tradeActions"><button class="edit" onclick="editTrade(${t.id})">✏️ Upraviť</button><button class="delete" onclick="deleteTrade(${t.id})">🗑️ Vymazať</button></div></td>`;b.appendChild(r)});const w=trades.filter(t=>t.result==="WIN").length,l=trades.filter(t=>t.result==="LOSE").length,total=w+l;el("wins").textContent=w;el("losses").textContent=l;el("winrate").textContent=total?(w/total*100).toFixed(1)+" %":"0 %";el("today").textContent=trades.filter(t=>t.date===el("date").value).length;nextNumber()}
+function download(name,data,type){const b=new Blob([data],{type}),u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
+function exportCSV(){const h="Datum,Cislo,Smer,Vysledok,Poistka,Trh,Stavka,Payout,Poznamka\n",rows=trades.map(t=>[t.date,t.number,t.direction,t.result,insuranceName(t.insurance),t.pair,t.amount,"92%",t.note].map(v=>`"${String(v||"").replace(/"/g,'""')}"`).join(",")).join("\n");download("trades.csv",h+rows,"text/csv")}
+function backup(){download("trade-backup.json",JSON.stringify(trades,null,2),"application/json")}
+function restoreBackup(file){const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!Array.isArray(d))throw 0;if(!confirm(`Načítať zálohu s ${d.length} obchodmi? Aktuálne dáta sa nahradia.`))return;trades=d;saveData();editingId=null;resetForm();render();msg("✓ Záloha bola obnovená")}catch(e){alert("Neplatná záloha Trade Trackeru.")}};rd.readAsText(file)}
+el("restoreFile").addEventListener("change",e=>{const f=e.target.files[0];if(f)restoreBackup(f);e.target.value=""});
+el("date").addEventListener("change",()=>{if(editingId===null)render()});render();
+</script></body></html>
