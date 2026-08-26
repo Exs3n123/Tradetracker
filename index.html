@@ -1,1 +1,533 @@
 
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trade Tracker</title>
+
+<style>
+body {
+    font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    background: #101217;
+    color: white;
+    margin: 0;
+    padding: 16px;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+.card {
+    background: #191d25;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 15px;
+}
+
+h1 { margin-bottom: 5px; }
+
+.subtitle {
+    color: #aaa;
+    margin-top: 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+label {
+    font-size: 12px;
+    color: #aaa;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input, select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #343b48;
+    background: #101319;
+    color: white;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: 0;
+    border-radius: 10px;
+    background: #4778ff;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.stat {
+    background: #101319;
+    padding: 12px 5px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat b {
+    font-size: 20px;
+}
+
+.win { color: #45d483; }
+.lose { color: #ff6572; }
+
+.success {
+    display: none;
+    color: #45d483;
+    text-align: center;
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.tablebox {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    min-width: 700px;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 9px;
+    border-bottom: 1px solid #303641;
+    font-size: 13px;
+}
+
+.delete {
+    width: auto;
+    padding: 6px 10px;
+    background: #7a2831;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.actions button {
+    font-size: 13px;
+    padding: 10px;
+}
+
+@media(max-width:600px) {
+    .stats {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📊 Trade Tracker</h1>
+<p class="subtitle">Denník obchodov • payout 92 %</p>
+
+<div class="card">
+
+<div class="grid">
+
+<div>
+<label>Dátum</label>
+<input type="date" id="date">
+</div>
+
+<div>
+<label>Obchod v daný deň</label>
+<input type="number" id="number" min="1">
+</div>
+
+<div>
+<label>Smer</label>
+<select id="direction">
+<option value="CALL">CALL</option>
+<option value="PUT">PUT</option>
+</select>
+</div>
+
+<div>
+<label>Výsledok</label>
+<select id="result">
+<option value="WIN">WIN</option>
+<option value="LOSE">LOSE</option>
+</select>
+</div>
+
+<div>
+<label>Poistka</label>
+<select id="insurance">
+<option value="1">1. obchod</option>
+<option value="2">1. poistka</option>
+<option value="3">2. poistka</option>
+<option value="4">3. poistka</option>
+<option value="5">4. poistka</option>
+</select>
+</div>
+
+<div>
+<label>Menový pár / trh</label>
+<input id="pair" placeholder="USD/JPY OTC">
+</div>
+
+<div>
+<label>Výška stávky €</label>
+<input type="number" id="amount" step="0.01" min="0" placeholder="50">
+</div>
+
+<div>
+<label>Poznámka</label>
+<input id="note" placeholder="napr. A setup">
+</div>
+
+</div>
+
+<br>
+
+<button onclick="saveTrade()">ULOŽIŤ OBCHOD</button>
+
+<div class="success" id="success">
+✓ Obchod bol uložený
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="stats">
+
+<div class="stat">
+Dnes<br>
+<b id="today">0</b>
+</div>
+
+<div class="stat">
+WIN<br>
+<b class="win" id="wins">0</b>
+</div>
+
+<div class="stat">
+LOSE<br>
+<b class="lose" id="losses">0</b>
+</div>
+
+<div class="stat">
+Win rate<br>
+<b id="winrate">0 %</b>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="actions">
+<button onclick="exportCSV()">Export CSV</button>
+<button onclick="backup()">Záloha</button>
+</div>
+
+<div class="tablebox">
+
+<table>
+
+<thead>
+<tr>
+<th>Dátum</th>
+<th>#</th>
+<th>Smer</th>
+<th>Výsledok</th>
+<th>Poistka</th>
+<th>Trh</th>
+<th>Stávka</th>
+<th>Poznámka</th>
+<th></th>
+</tr>
+</thead>
+
+<tbody id="table"></tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+const STORAGE = "tradeTrackerDataV1";
+
+let trades = [];
+
+try {
+    trades = JSON.parse(localStorage.getItem(STORAGE)) || [];
+} catch(e) {
+    trades = [];
+}
+
+const el = id => document.getElementById(id);
+
+function todayDate() {
+    const d = new Date();
+    const offset = d.getTimezoneOffset();
+    return new Date(d.getTime() - offset * 60000)
+        .toISOString()
+        .slice(0,10);
+}
+
+el("date").value = todayDate();
+
+function insuranceName(n) {
+    const names = {
+        1:"1. obchod",
+        2:"1. poistka",
+        3:"2. poistka",
+        4:"3. poistka",
+        5:"4. poistka"
+    };
+
+    return names[n];
+}
+
+function nextNumber() {
+
+    const date = el("date").value;
+
+    const numbers = trades
+        .filter(t => t.date === date)
+        .map(t => Number(t.number));
+
+    el("number").value =
+        numbers.length ? Math.max(...numbers) + 1 : 1;
+}
+
+function saveData() {
+    localStorage.setItem(
+        STORAGE,
+        JSON.stringify(trades)
+    );
+}
+
+function saveTrade() {
+
+    const trade = {
+
+        id: Date.now(),
+
+        date: el("date").value,
+
+        number: Number(el("number").value),
+
+        direction: el("direction").value,
+
+        result: el("result").value,
+
+        insurance: Number(el("insurance").value),
+
+        pair: el("pair").value,
+
+        amount: el("amount").value,
+
+        note: el("note").value,
+
+        payout: 92
+    };
+
+    trades.push(trade);
+
+    saveData();
+
+    el("pair").value = "";
+    el("amount").value = "";
+    el("note").value = "";
+
+    render();
+
+    el("success").style.display = "block";
+
+    setTimeout(() => {
+        el("success").style.display = "none";
+    },1500);
+}
+
+function deleteTrade(id) {
+
+    if(!confirm("Vymazať tento obchod?"))
+        return;
+
+    trades = trades.filter(
+        t => t.id !== id
+    );
+
+    saveData();
+
+    render();
+}
+
+function render() {
+
+    const tbody = el("table");
+
+    tbody.innerHTML = "";
+
+    [...trades]
+    .reverse()
+    .forEach(t => {
+
+        const row =
+        document.createElement("tr");
+
+        row.innerHTML = `
+        <td>${t.date}</td>
+        <td>${t.number}</td>
+        <td>${t.direction}</td>
+
+        <td class="${t.result === "WIN" ? "win" : "lose"}">
+        ${t.result}
+        </td>
+
+        <td>${insuranceName(t.insurance)}</td>
+
+        <td>${t.pair}</td>
+
+        <td>
+        ${t.amount ? Number(t.amount).toFixed(2)+" €" : ""}
+        </td>
+
+        <td>${t.note}</td>
+
+        <td>
+        <button
+        class="delete"
+        onclick="deleteTrade(${t.id})">
+        ×
+        </button>
+        </td>
+        `;
+
+        tbody.appendChild(row);
+    });
+
+    const wins =
+        trades.filter(t => t.result === "WIN").length;
+
+    const losses =
+        trades.filter(t => t.result === "LOSE").length;
+
+    const total =
+        wins + losses;
+
+    el("wins").textContent = wins;
+
+    el("losses").textContent = losses;
+
+    el("winrate").textContent =
+        total
+        ? (wins / total * 100).toFixed(1) + " %"
+        : "0 %";
+
+    const selectedDate =
+        el("date").value;
+
+    el("today").textContent =
+        trades.filter(
+            t => t.date === selectedDate
+        ).length;
+
+    nextNumber();
+}
+
+function exportCSV() {
+
+    const header =
+    "Datum,Cislo,Smer,Vysledok,Poistka,Trh,Stavka,Payout,Poznamka\n";
+
+    const rows =
+    trades.map(t => {
+
+        return [
+            t.date,
+            t.number,
+            t.direction,
+            t.result,
+            insuranceName(t.insurance),
+            t.pair,
+            t.amount,
+            "92%",
+            t.note
+        ].map(v =>
+            `"${String(v || "").replace(/"/g,'""')}"`
+        ).join(",");
+
+    }).join("\n");
+
+    download(
+        "trades.csv",
+        header + rows,
+        "text/csv"
+    );
+}
+
+function backup() {
+
+    download(
+        "trade-backup.json",
+        JSON.stringify(trades,null,2),
+        "application/json"
+    );
+}
+
+function download(name,data,type) {
+
+    const blob =
+        new Blob([data],{type:type});
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download = name;
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+el("date").addEventListener(
+    "change",
+    render
+);
+
+render();
+
+</script>
+
+</body>
+</html>
